@@ -63,6 +63,7 @@ Desktop.ini
 .DS_Store
 
 # Local agent/tool state
+.worktrees/
 .agents/
 .serena/
 .claude/
