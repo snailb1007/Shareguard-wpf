@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using ShareGuard.Application.Services;
 
 namespace ShareGuard.Application;
 
@@ -6,7 +7,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-        // Application layer service registrations will be added here
+        services.AddSingleton<IImageCleanupService, ImageCleanupService>();
         return services;
     }
 }
