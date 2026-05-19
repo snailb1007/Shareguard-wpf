@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="ShareGuard.Domain/ShareGuard.Domain.csproj" />
+  <Project Path="ShareGuard.Application/ShareGuard.Application.csproj" />
+  <Project Path="ShareGuard.Infrastructure/ShareGuard.Infrastructure.csproj" />
+  <Project Path="Shareguard-wpf/Shareguard-wpf.csproj" />
+</Solution>
