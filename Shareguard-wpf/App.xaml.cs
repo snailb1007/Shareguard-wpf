@@ -14,7 +14,7 @@ public partial class App : System.Windows.Application
 {
     private IHost? _host;
 
-    private async void Application_Startup(object sender, StartupEventArgs e)
+    private async void ApplicationStartup(object sender, StartupEventArgs e)
     {
         var builder = Host.CreateApplicationBuilder();
 
@@ -33,7 +33,7 @@ public partial class App : System.Windows.Application
         mainWindow.Show();
     }
 
-    private async void Application_Exit(object sender, ExitEventArgs e)
+    private async void ApplicationExit(object sender, ExitEventArgs e)
     {
         if (_host is not null)
         {
