@@ -3,4 +3,6 @@
   <Project Path="ShareGuard.Application/ShareGuard.Application.csproj" />
   <Project Path="ShareGuard.Infrastructure/ShareGuard.Infrastructure.csproj" />
   <Project Path="Shareguard-wpf/Shareguard-wpf.csproj" />
+  <Project Path="ShareGuard.Domain.Tests/ShareGuard.Domain.Tests.csproj" />
+  <Project Path="ShareGuard.Application.Tests/ShareGuard.Application.Tests.csproj" />
 </Solution>
