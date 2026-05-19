@@ -5,8 +5,10 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\ShareGuard.Application\ShareGuard.Application.csproj" />
+    <ProjectReference Include="..\ShareGuard.Infrastructure\ShareGuard.Infrastructure.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="NSubstitute" />
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit.runner.visualstudio" />
