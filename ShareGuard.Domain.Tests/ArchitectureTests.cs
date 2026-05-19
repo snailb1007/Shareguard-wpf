@@ -1,3 +1,4 @@
+using System.Reflection;
 using Xunit;
 
 namespace ShareGuard.Domain.Tests;
@@ -7,7 +8,7 @@ public class ArchitectureTests
     [Fact]
     public void Domain_ShouldNotReference_ApplicationOrInfrastructure()
     {
-        var domainAssembly = typeof(ArchitectureTests).Assembly;
+        var domainAssembly = Assembly.Load("ShareGuard.Domain");
         var referencedAssemblies = domainAssembly.GetReferencedAssemblies()
             .Select(a => a.Name)
             .ToList();
