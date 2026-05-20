@@ -13,6 +13,11 @@ public static class DependencyInjection
     {
         services.AddSingleton<IImageCleaner, ImageSharpCleaner>();
 
+        // Phase 4 IFileStripper registrations
+        services.AddSingleton<IFileStripper, ImageSharpStripper>();
+        services.AddSingleton<IFileStripper, OfficeOpenXmlStripper>();
+        services.AddSingleton<IFileStripper, PdfMetadataStripper>();
+
         // Place SQLite database in AppData folder
         string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         string dbFolder = Path.Combine(appData, "ShareGuard");

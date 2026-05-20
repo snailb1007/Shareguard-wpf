@@ -18,6 +18,9 @@ public static class DependencyInjection
         // Register parallel multi-file processor service
         services.AddSingleton<IMultiFileProcessorService, MultiFileProcessorService>();
 
+        // Generalized file cleanup service (Phase 4)
+        services.AddSingleton<IFileCleanupService, FileCleanupService>();
+
         return services;
     }
 }
