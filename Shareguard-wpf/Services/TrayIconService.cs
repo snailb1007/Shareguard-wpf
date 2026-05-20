@@ -1,5 +1,4 @@
 using System;
-using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 using H.NotifyIcon;
@@ -26,6 +25,11 @@ public sealed class TrayIconService : ITrayIconService
     {
         if (_disposed)
             throw new ObjectDisposedException(nameof(TrayIconService));
+
+        if (_taskbarIcon != null)
+        {
+            throw new InvalidOperationException("Tray icon service is already initialized.");
+        }
 
         _taskbarIcon = new TaskbarIcon
         {
@@ -69,11 +73,20 @@ public sealed class TrayIconService : ITrayIconService
 
     public void UpdateClipboardMonitorMenuText(bool isMonitoring)
     {
-        if (_clipboardMonitorMenuItem != null)
+        if (_clipboardMonitorMenuItem == null)
+        {
+            return;
+        }
+
+        if (_clipboardMonitorMenuItem.Dispatcher.CheckAccess())
         {
             _clipboardMonitorMenuItem.Header = isMonitoring
                 ? "Pause Clipboard Monitor"
                 : "Resume Clipboard Monitor";
+        }
+        else
+        {
+            _clipboardMonitorMenuItem.Dispatcher.Invoke(() => UpdateClipboardMonitorMenuText(isMonitoring));
         }
     }
 
@@ -82,6 +95,15 @@ public sealed class TrayIconService : ITrayIconService
         if (_disposed) return;
         _taskbarIcon?.Dispose();
         _taskbarIcon = null;
+        _clipboardMonitorMenuItem = null;
+        
+        // Clear event handlers to prevent potential memory leaks
+        RestoreRequested = null;
+        CleanClipboardRequested = null;
+        ToggleClipboardMonitorRequested = null;
+        SettingsRequested = null;
+        ExitRequested = null;
+
         _disposed = true;
     }
 }
