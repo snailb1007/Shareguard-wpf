@@ -4,12 +4,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-        xmlns:vm="clr-namespace:ShareGuard.App.ViewModels"
+        xmlns:viewmodels="clr-namespace:ShareGuard.App.ViewModels"
         mc:Ignorable="d"
-        d:DataContext="{d:DesignInstance vm:MainViewModel}"
+        d:DataContext="{d:DesignInstance viewmodels:MainViewModel}"
         Title="{Binding Title}"
-        Height="650" Width="500"
-        MinHeight="500" MinWidth="420"
+        Height="650" Width="1000"
+        Background="#0F172A"
         WindowStartupLocation="CenterScreen"
         ExtendsContentIntoTitleBar="True"
         AllowDrop="True"
@@ -17,203 +17,553 @@
         Drop="Window_Drop">
 
     <ui:FluentWindow.Resources>
-        <!-- Converters for state visibility -->
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
+        <!-- Inverse boolean to visibility -->
+        <Style x:Key="InverseVisStyle" TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsBatchProcessing}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ShowBatchResults}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Tab Item Custom Style -->
+        <Style x:Key="ModernTabItem" TargetType="TabItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="border"
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                BorderThickness="0,0,0,2"
+                                Padding="20,10"
+                                Margin="0,0,16,0"
+                                Cursor="Hand">
+                            <ContentPresenter x:Name="contentPresenter"
+                                              ContentSource="Header"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#3B82F6" />
+                                <Setter Property="Foreground" Value="#3B82F6" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="False">
+                                <Setter Property="Foreground" Value="#94A3B8" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="#F8FAFC" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Standard Accent Button -->
+        <Style x:Key="AccentButton" TargetType="Button">
+            <Setter Property="Background" Value="#3B82F6" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Padding" Value="20,10" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#2563EB" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#1D4ED8" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Background" Value="#334155" />
+                                <Setter Property="Foreground" Value="#64748B" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Secondary Button Style -->
+        <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource AccentButton}">
+            <Setter Property="Background" Value="#1E293B" />
+            <Setter Property="Foreground" Value="#F8FAFC" />
+            <Setter Property="BorderBrush" Value="#334155" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#334155" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#475569" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="#475569" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Modern TextBox -->
+        <Style x:Key="ModernTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#1E293B" />
+            <Setter Property="Foreground" Value="#F8FAFC" />
+            <Setter Property="CaretBrush" Value="#F8FAFC" />
+            <Setter Property="BorderBrush" Value="#334155" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ScrollViewer x:Name="PART_ContentHost" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </ui:FluentWindow.Resources>
 
-    <Grid Margin="0,36,0,0">
-        <!-- ═══════════════════════════════════════════════ -->
-        <!-- STATE 1: DROP ZONE (visible when CurrentState == DropZone) -->
-        <!-- ═══════════════════════════════════════════════ -->
-        <Grid x:Name="DropZonePanel" Margin="32">
-            <Border BorderBrush="{ui:ThemeResource ControlStrokeColorDefaultBrush}"
-                    BorderThickness="2"
-                    CornerRadius="12"
-                    Background="Transparent"
-                    Padding="32">
-                <Border.Style>
-                    <Style TargetType="Border">
-                        <Setter Property="BorderBrush" Value="{ui:ThemeResource ControlStrokeColorDefaultBrush}" />
-                    </Style>
-                </Border.Style>
+    <Grid Margin="24,36,24,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="16" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
 
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <ui:SymbolIcon Symbol="ArrowDownload24"
-                                   FontSize="48"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,0,0,16" />
-
-                    <TextBlock Text="Drag &amp; drop your image here"
-                               FontSize="20"
-                               FontWeight="SemiBold"
-                               HorizontalAlignment="Center"
-                               Margin="0,0,0,8" />
-
-                    <TextBlock Text="Supports JPEG, PNG, and WEBP. Original files are never modified."
-                               FontSize="13"
-                               Opacity="0.6"
-                               HorizontalAlignment="Center"
-                               TextWrapping="Wrap"
-                               TextAlignment="Center"
-                               Margin="0,0,0,24" />
-
-                    <ui:Button Content="Browse Files"
-                               Appearance="Primary"
-                               Icon="{ui:SymbolIcon FolderOpen24}"
-                               HorizontalAlignment="Center"
-                               Padding="24,10"
-                               Command="{Binding BrowseFileCommand}" />
-
-                    <!-- Error message (if any) -->
-                    <Border x:Name="ErrorBanner"
-                             Background="#33C42B1C"
-                             CornerRadius="8"
-                             Padding="16,10"
-                             Margin="0,20,0,0"
-                             Visibility="Collapsed">
-                        <TextBlock x:Name="ErrorText"
-                                   Foreground="#FFC42B1C"
-                                   TextWrapping="Wrap"
-                                   FontSize="13" />
-                    </Border>
-                </StackPanel>
-            </Border>
-        </Grid>
-
-        <!-- ═══════════════════════════════════════════════ -->
-        <!-- STATE 2: PROCESSING (visible when CurrentState == Processing) -->
-        <!-- ═══════════════════════════════════════════════ -->
-        <Grid x:Name="ProcessingPanel" Visibility="Collapsed">
-            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <ui:ProgressRing IsIndeterminate="True"
-                                 Width="64" Height="64"
-                                 Margin="0,0,0,24" />
-
-                <TextBlock Text="Cleaning image metadata..."
-                           FontSize="16"
-                           FontWeight="SemiBold"
-                           HorizontalAlignment="Center"
-                           Margin="0,0,0,8" />
-
-                <TextBlock Text="Stripping GPS, camera, date, and software data"
+        <!-- App Header Banner -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="🛡️ ShareGuard"
+                           FontSize="26"
+                           FontWeight="Bold"
+                           Foreground="#F8FAFC" />
+                <TextBlock Text="Stripping personal metadata and tracking parameters"
                            FontSize="13"
-                           Opacity="0.6"
-                           HorizontalAlignment="Center" />
+                           Foreground="#64748B"
+                           Margin="0,2,0,0" />
             </StackPanel>
         </Grid>
 
-        <!-- ═══════════════════════════════════════════════ -->
-        <!-- STATE 3: RESULTS (visible when CurrentState == Results) -->
-        <!-- ═══════════════════════════════════════════════ -->
-        <Grid x:Name="ResultsPanel" Visibility="Collapsed" Margin="24">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-
-            <!-- Success banner -->
-            <Border Grid.Row="0"
-                    Background="#3300A86B"
-                    CornerRadius="10"
-                    Padding="16"
-                    Margin="0,0,0,16">
-                <Grid>
+        <!-- Main Tabbed Panel Layout -->
+        <TabControl Grid.Row="2"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Margin="0,8,0,0">
+            
+            <!-- CLEAN FILES & URLs TAB -->
+            <TabItem Header="Clean Files &amp; URLs" Style="{StaticResource ModernTabItem}">
+                <Grid Margin="0,16,0,0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="340" />
+                        <ColumnDefinition Width="24" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <ui:SymbolIcon Symbol="CheckmarkCircle24"
-                                   Foreground="#FF00A86B"
-                                   FontSize="28"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,12,0" />
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="Image cleaned successfully"
-                                   FontSize="15"
-                                   FontWeight="SemiBold" />
-                        <TextBlock x:Name="ElapsedText"
-                                   FontSize="12"
-                                   Opacity="0.6"
-                                   Margin="0,2,0,0" />
+
+                    <!-- Left: URL Cleaner Card Controls -->
+                    <StackPanel Grid.Column="0">
+                        <!-- Auto Clipboard Monitor Section -->
+                        <Border Background="#1E293B"
+                                CornerRadius="12"
+                                Padding="16"
+                                Margin="0,0,0,16">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="Auto-Clean Clipboard"
+                                               FontSize="15"
+                                               FontWeight="SemiBold"
+                                               Foreground="#F8FAFC" />
+                                    <TextBlock Text="Strips track parameters on copy"
+                                               FontSize="11"
+                                               Foreground="#94A3B8"
+                                               Margin="0,2,0,0" />
+                                </StackPanel>
+                                <CheckBox Grid.Column="1"
+                                          IsChecked="{Binding IsMonitoring}"
+                                          VerticalAlignment="Center"
+                                          Content="Active"
+                                          Foreground="#94A3B8"
+                                          FontSize="12" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Manual URL Ingestion Card -->
+                        <Border Background="#1E293B"
+                                CornerRadius="12"
+                                Padding="16">
+                            <StackPanel>
+                                <TextBlock Text="Manual URL Stripper"
+                                           FontSize="15"
+                                           FontWeight="SemiBold"
+                                           Foreground="#F8FAFC"
+                                           Margin="0,0,0,8" />
+                                <TextBox Style="{StaticResource ModernTextBox}"
+                                         Text="{Binding ManualUrlInput, UpdateSourceTrigger=PropertyChanged}"
+                                         Margin="0,0,0,12" />
+                                <Button Style="{StaticResource AccentButton}"
+                                        Content="Clean URL"
+                                        HorizontalAlignment="Right"
+                                        Command="{Binding CleanManualUrlCommand}" />
+
+                                <!-- Result Area -->
+                                <Border Visibility="{Binding ShowResults, Converter={StaticResource BoolToVis}}"
+                                        Background="#0F172A"
+                                        CornerRadius="8"
+                                        Padding="12"
+                                        Margin="0,16,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="Original URL" FontSize="11" Foreground="#64748B" />
+                                        <TextBox Text="{Binding BeforeUrl, Mode=OneWay}"
+                                                 IsReadOnly="True" Background="Transparent" Foreground="#EF4444"
+                                                 BorderThickness="0" FontSize="12" TextWrapping="Wrap" Margin="0,2,0,8" />
+
+                                        <TextBlock Text="Cleaned URL" FontSize="11" Foreground="#64748B" />
+                                        <TextBox Text="{Binding AfterUrl, Mode=OneWay}"
+                                                 IsReadOnly="True" Background="Transparent" Foreground="#22C55E"
+                                                 BorderThickness="0" FontSize="12" TextWrapping="Wrap" Margin="0,2,0,8" />
+
+                                        <TextBlock Foreground="#94A3B8" FontSize="11">
+                                            <Run Text="Parameters stripped: " />
+                                            <Run Text="{Binding RemovedCount, Mode=OneWay}" FontWeight="Bold" Foreground="#F59E0B" />
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
+
+                    <!-- Right Column: Parallel File Stripper Panel -->
+                    <Grid Grid.Column="2">
+                        
+                        <!-- 1. DRAG AND DROP ZONE -->
+                        <Border Style="{StaticResource InverseVisStyle}"
+                                BorderBrush="#334155"
+                                BorderThickness="2"
+                                CornerRadius="12"
+                                Background="#1E293B"
+                                AllowDrop="True"
+                                x:Name="FileDropBorder">
+                            <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="📂" FontSize="44" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Drag and Drop Files Here"
+                                               FontSize="18"
+                                               FontWeight="SemiBold"
+                                               Foreground="#F8FAFC"
+                                               Margin="0,12,0,0"
+                                               HorizontalAlignment="Center" />
+                                    <TextBlock Text="Supports JPEG, PNG, WEBP images (batch processing enabled)"
+                                               FontSize="12"
+                                               Foreground="#94A3B8"
+                                               Margin="0,4,0,16"
+                                               HorizontalAlignment="Center" />
+                                    <Button Style="{StaticResource AccentButton}"
+                                            Content="Browse Local Files"
+                                            Command="{Binding BrowseFilesCommand}"
+                                            HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- 2. BATCH PROCESSING PROGRESS RING / BAR -->
+                        <Border Visibility="{Binding IsBatchProcessing, Converter={StaticResource BoolToVis}}"
+                                Background="#1E293B"
+                                CornerRadius="12"
+                                Padding="24">
+                            <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Width="400">
+                                <StackPanel>
+                                    <TextBlock Text="Processing File Batch..."
+                                               FontSize="18"
+                                               FontWeight="SemiBold"
+                                               Foreground="#F8FAFC"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,0,0,16" />
+                                    
+                                    <ProgressBar Height="10"
+                                                 Value="{Binding BatchProgressPercentage, Mode=OneWay}"
+                                                 Background="#0F172A"
+                                                 Foreground="#3B82F6"
+                                                 BorderThickness="0"
+                                                 Margin="0,0,0,8" />
+                                    
+                                    <Grid Margin="0,0,0,16">
+                                        <TextBlock Foreground="#94A3B8" FontSize="12" HorizontalAlignment="Left">
+                                            <Run Text="Progress: " />
+                                            <Run Text="{Binding CurrentFilesProcessed, Mode=OneWay}" Foreground="#F8FAFC" FontWeight="SemiBold" />
+                                            <Run Text=" of " />
+                                            <Run Text="{Binding TotalFilesToProcess, Mode=OneWay}" Foreground="#F8FAFC" FontWeight="SemiBold" />
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding BatchProgressPercentage, StringFormat={}{0:0}%, Mode=OneWay}"
+                                                   Foreground="#3B82F6"
+                                                   FontSize="12"
+                                                   FontWeight="SemiBold"
+                                                   HorizontalAlignment="Right" />
+                                    </Grid>
+
+                                    <TextBlock Text="{Binding CurrentFileName}"
+                                               FontSize="13"
+                                               Foreground="#94A3B8"
+                                               TextTrimming="CharacterEllipsis"
+                                               HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- 3. BATCH RESULTS GRID -->
+                        <Border Visibility="{Binding ShowBatchResults, Converter={StaticResource BoolToVis}}"
+                                Background="#1E293B"
+                                CornerRadius="12"
+                                Padding="16">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="12" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="12" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <Grid Grid.Row="0">
+                                    <TextBlock Text="Batch Clean Results" FontSize="16" FontWeight="SemiBold" Foreground="#F8FAFC" />
+                                    <Button Style="{StaticResource SecondaryButton}"
+                                            Content="Dismiss"
+                                            Command="{Binding ClearBatchResultsCommand}"
+                                            HorizontalAlignment="Right"
+                                            Padding="10,4"
+                                            FontSize="12" />
+                                </Grid>
+
+                                <!-- Grid detailing stripped values -->
+                                <ListView Grid.Row="2"
+                                          ItemsSource="{Binding CurrentBatchResults}"
+                                          Background="Transparent"
+                                          BorderThickness="0"
+                                          Foreground="#F8FAFC">
+                                    <!-- Enable Virtualization -->
+                                    <ListView.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <VirtualizingStackPanel IsVirtualizing="True" VirtualizationMode="Recycling" />
+                                        </ItemsPanelTemplate>
+                                    </ListView.ItemsPanel>
+                                    <ListView.View>
+                                        <GridView>
+                                            <GridViewColumn Header="File Name" Width="150">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding FileName}" Foreground="#F8FAFC" TextTrimming="CharacterEllipsis" />
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                            <GridViewColumn Header="Stripped Count" Width="90">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding FindingsCount}" Foreground="#F59E0B" FontWeight="Bold" HorizontalAlignment="Center" />
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                            <GridViewColumn Header="Status" Width="80">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding StatusText}" Foreground="{Binding StatusColor}" FontWeight="SemiBold" />
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                            <GridViewColumn Header="Actions" Width="120">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <Button Content="Show Folder"
+                                                                FontSize="11"
+                                                                Padding="8,2"
+                                                                Style="{StaticResource SecondaryButton}"
+                                                                Command="{Binding DataContext.OpenFileFolderCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                CommandParameter="{Binding CleanPath}"
+                                                                IsEnabled="{Binding Success}" />
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                        </GridView>
+                                    </ListView.View>
+                                </ListView>
+
+                                <TextBlock Grid.Row="4" Foreground="#94A3B8" FontSize="11" Text="Click 'Show Folder' to open output directory and highlight the cleaned file." />
+                            </Grid>
+                        </Border>
+                    </Grid>
                 </Grid>
-            </Border>
+            </TabItem>
 
-            <!-- File paths card -->
-            <ui:Card Grid.Row="1" Margin="0,0,0,16" Padding="16">
-                <StackPanel>
-                    <TextBlock Text="Original"
-                               FontSize="11"
-                               Opacity="0.5"
-                               Margin="0,0,0,2" />
-                    <TextBlock x:Name="OriginalPathText"
-                               FontSize="13"
-                               TextTrimming="CharacterEllipsis"
-                               Margin="0,0,0,12" />
+            <!-- SQL DATABASE HISTORY VIEWER TAB -->
+            <TabItem Header="Operation History" Style="{StaticResource ModernTabItem}">
+                <Grid Margin="0,16,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="12" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="12" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-                    <TextBlock Text="Clean copy"
-                               FontSize="11"
-                               Opacity="0.5"
-                               Margin="0,0,0,2" />
-                    <TextBlock x:Name="CleanPathText"
-                               FontSize="13"
-                               TextTrimming="CharacterEllipsis"
-                               Margin="0,0,0,12" />
+                    <!-- Header with wipe button -->
+                    <Grid Grid.Row="0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="Local Operations History log" FontSize="16" FontWeight="SemiBold" Foreground="#F8FAFC" />
+                            <TextBlock Text=" (Stored in Local SQLite database)" FontSize="12" Foreground="#64748B" VerticalAlignment="Bottom" Margin="4,0,0,1" />
+                        </StackPanel>
+                        <Button Style="{StaticResource SecondaryButton}"
+                                Content="Clear History Log"
+                                Command="{Binding ClearHistoryCommand}"
+                                HorizontalAlignment="Right"
+                                Padding="12,5"
+                                FontSize="12" />
+                    </Grid>
 
-                    <ui:Button Content="Open Folder"
-                               Appearance="Primary"
-                               Icon="{ui:SymbolIcon FolderOpen24}"
-                               HorizontalAlignment="Left"
-                               Padding="16,8"
-                               Command="{Binding OpenFolderCommand}" />
-                </StackPanel>
-            </ui:Card>
-
-            <!-- Findings grouped by category -->
-            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
-                <ItemsControl x:Name="FindingsContainer"
-                               ItemsSource="{Binding FindingGroups}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <ui:CardExpander Header="{Binding DisplayHeader}"
-                                              Margin="0,0,0,8"
-                                              IsExpanded="False">
-                                <ItemsControl ItemsSource="{Binding Items}" Margin="8,4">
-                                    <ItemsControl.ItemTemplate>
+                    <!-- Virtualized History Log List -->
+                    <ListView Grid.Row="2"
+                              ItemsSource="{Binding HistoryEvents}"
+                              Background="#1E293B"
+                              BorderThickness="1"
+                              BorderBrush="#334155"
+                              Foreground="#F8FAFC">
+                        <!-- Enable UI Virtualization explicitly -->
+                        <ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel IsVirtualizing="True" VirtualizationMode="Recycling" />
+                            </ItemsPanelTemplate>
+                        </ListView.ItemsPanel>
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Source" Width="180">
+                                    <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <Grid Margin="0,3">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Text="{Binding FieldName}"
-                                                           FontSize="12"
-                                                           Opacity="0.7" />
-                                                <TextBlock Grid.Column="1"
-                                                           Text="{Binding Value}"
-                                                           FontSize="12"
-                                                           TextTrimming="CharacterEllipsis"
-                                                           Opacity="0.5" />
-                                            </Grid>
+                                            <TextBlock Text="{Binding FileName}" Foreground="#F8FAFC" TextTrimming="CharacterEllipsis" FontWeight="SemiBold" />
                                         </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ui:CardExpander>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Processed Date" Width="130">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding ProcessedAt}" Foreground="#94A3B8" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Findings" Width="70">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding FindingsCount}" Foreground="#F59E0B" FontWeight="Bold" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Status" Width="70">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding StatusText}" Foreground="{Binding StatusColor}" FontWeight="SemiBold" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Original Path" Width="200">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding OriginalPath}" Foreground="#64748B" TextTrimming="CharacterEllipsis" ToolTip="{Binding OriginalPath}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Actions" Width="120">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="Show Cleaned"
+                                                    FontSize="11"
+                                                    Padding="8,2"
+                                                    Style="{StaticResource SecondaryButton}"
+                                                    Command="{Binding DataContext.OpenFileFolderCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding CleanPath}"
+                                                    IsEnabled="{Binding IsSuccess}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
 
-            <!-- Back button -->
-            <ui:Button Grid.Row="3"
-                       Content="Clean Another Image"
-                       Icon="{ui:SymbolIcon ArrowLeft24}"
-                       HorizontalAlignment="Center"
-                       Margin="0,16,0,0"
-                       Padding="24,10"
-                       Command="{Binding GoBackCommand}" />
-        </Grid>
+                    <!-- Pager navigation panel -->
+                    <Grid Grid.Row="4">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                            <TextBlock Text="Page " Foreground="#94A3B8" FontSize="13" />
+                            <TextBlock Text="{Binding CurrentHistoryPage}" Foreground="#F8FAFC" FontWeight="Bold" FontSize="13" />
+                            <TextBlock Text=" of " Foreground="#94A3B8" FontSize="13" />
+                            <TextBlock Text="{Binding TotalHistoryPages}" Foreground="#F8FAFC" FontWeight="Bold" FontSize="13" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Style="{StaticResource SecondaryButton}"
+                                    Content="◀ Prev"
+                                    Command="{Binding PrevHistoryPageCommand}"
+                                    Margin="0,0,8,0"
+                                    Padding="12,4"
+                                    FontSize="12" />
+                            <Button Style="{StaticResource SecondaryButton}"
+                                    Content="Next ▶"
+                                    Command="{Binding NextHistoryPageCommand}"
+                                    Padding="12,4"
+                                    FontSize="12" />
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- Status Bar -->
+        <TextBlock Grid.Row="3"
+                   Text="{Binding StatusMessage}"
+                   FontSize="12"
+                   Foreground="#64748B"
+                   Margin="0,16,0,0" />
     </Grid>
 </ui:FluentWindow>

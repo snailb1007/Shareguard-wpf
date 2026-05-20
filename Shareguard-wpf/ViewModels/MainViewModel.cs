@@ -80,24 +80,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
     private const int HistoryPageSize = 10;
 
-    // Stubs for temporary compilation with old MainWindow.xaml.cs/xaml
-    [ObservableProperty]
-    private AppState _currentState = AppState.DropZone;
 
-    [ObservableProperty]
-    private string? _originalFilePath;
-
-    [ObservableProperty]
-    private string? _cleanFilePath;
-
-    [ObservableProperty]
-    private string? _errorMessage;
-
-    [ObservableProperty]
-    private TimeSpan _elapsed;
-
-    public ObservableCollection<Finding> Findings { get; } = new();
-    public ObservableCollection<FindingGroup> FindingGroups { get; } = new();
 
     public MainViewModel(
         IUrlCleanerService urlCleaner,
@@ -319,7 +302,27 @@ public partial class MainViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void OpenFileFolder(string? path)
     {
-        if (string.IsNullOrEmpty(path) || !File.Exists(path)) return;
+        if (string.IsNullOrEmpty(path)) return;
+
+        if (path.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || 
+            path.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = path,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Failed to open URL: {ex.Message}";
+            }
+            return;
+        }
+
+        if (!File.Exists(path)) return;
         try
         {
             System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{path}\"");
@@ -404,18 +407,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    // Stubs for temporary compilation with old MainWindow.xaml.cs/xaml
-    [RelayCommand]
-    private async Task CleanImage(string filePath) => await Task.CompletedTask;
 
-    [RelayCommand]
-    private void BrowseFile() { }
-
-    [RelayCommand]
-    private void OpenFolder() { }
-
-    [RelayCommand]
-    private void GoBack() { }
 
     public void Dispose()
     {
@@ -448,15 +440,4 @@ public class HistoryEventViewModel
     public string StatusColor => IsSuccess ? "#22C55E" : "#EF4444";
 }
 
-public enum AppState
-{
-    DropZone,
-    Processing,
-    Results
-}
 
-public sealed record FindingGroup(string Category, IReadOnlyList<Finding> Items)
-{
-    public int Count => Items.Count;
-    public string DisplayHeader => $"{Category} ({Count})";
-}
