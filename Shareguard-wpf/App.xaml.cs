@@ -1,6 +1,7 @@
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using ShareGuard.App.Services;
 using ShareGuard.App.ViewModels;
 using ShareGuard.Application;
 using ShareGuard.Infrastructure;
@@ -23,6 +24,7 @@ public partial class App : System.Windows.Application
         builder.Services.AddInfrastructureServices();
 
         // Presentation layer registrations
+        builder.Services.AddSingleton<IClipboardMonitorService, WindowsClipboardMonitorService>();
         builder.Services.AddSingleton<MainViewModel>();
         builder.Services.AddSingleton<MainWindow>();
 
