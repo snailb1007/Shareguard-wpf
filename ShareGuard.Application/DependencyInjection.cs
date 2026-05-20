@@ -21,6 +21,9 @@ public static class DependencyInjection
         // Generalized file cleanup service (Phase 4)
         services.AddSingleton<IFileCleanupService, FileCleanupService>();
 
+        // Settings Service (Phase 5)
+        services.AddSingleton<ISettingsService, SettingsService>();
+
         return services;
     }
 }
