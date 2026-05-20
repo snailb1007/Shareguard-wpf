@@ -7,5 +7,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
     <PackageReference Include="SixLabors.ImageSharp" />
+    <PackageReference Include="DocumentFormat.OpenXml" />
+    <PackageReference Include="PDFsharp" />
   </ItemGroup>
 </Project>
