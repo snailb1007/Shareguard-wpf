@@ -8,6 +8,17 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.8" />
     <!-- DI Abstractions (needed by Application layer for IServiceCollection) -->
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.8" />
+    <!-- Database -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.8" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8" />
+    <!-- Image Processing -->
+    <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.12" />
+    <!-- UI Controls -->
+    <PackageVersion Include="WPF-UI" Version="4.3.0" />
+    <!-- URL Parsing -->
+    <PackageVersion Include="Flurl" Version="4.0.0" />
+    <!-- Mocking -->
+    <PackageVersion Include="NSubstitute" Version="5.3.0" />
     <!-- Testing -->
     <PackageVersion Include="xunit.v3" Version="3.2.2" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
