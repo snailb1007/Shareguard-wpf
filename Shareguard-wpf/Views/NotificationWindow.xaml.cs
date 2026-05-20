@@ -11,6 +11,8 @@ namespace ShareGuard.App.Views;
 /// </summary>
 public partial class NotificationWindow : Window
 {
+    public const double DefaultHeight = 80;
+
     private readonly DispatcherTimer _closeTimer;
     private readonly double _targetY;
 
@@ -89,8 +91,11 @@ public partial class NotificationWindow : Window
 
     private void Window_MouseDown(object sender, MouseButtonEventArgs e)
     {
-        // Close immediately on click
-        _closeTimer.Stop();
-        Close();
+        // Close immediately on left click only
+        if (e.ChangedButton == MouseButton.Left)
+        {
+            _closeTimer.Stop();
+            Close();
+        }
     }
 }

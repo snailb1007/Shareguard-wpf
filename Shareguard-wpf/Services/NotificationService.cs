@@ -12,8 +12,7 @@ namespace ShareGuard.App.Services;
 /// </summary>
 public class NotificationService : INotificationService
 {
-    private static readonly List<NotificationWindow> _activeNotifications = new();
-    private static readonly object _lock = new();
+    private readonly List<NotificationWindow> _activeNotifications = new();
 
     public void ShowNotification(string title, string message)
     {
@@ -24,27 +23,21 @@ public class NotificationService : INotificationService
 
         System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
         {
-            lock (_lock)
+            double margin = 10;
+            double spacing = 5;
+            double windowHeight = NotificationWindow.DefaultHeight;
+            double targetY = SystemParameters.WorkArea.Bottom - windowHeight - margin - (_activeNotifications.Count * (windowHeight + spacing));
+
+            var notification = new NotificationWindow(title, message, targetY);
+            
+            notification.Closed += (s, e) =>
             {
-                double margin = 10;
-                double spacing = 5;
-                double windowHeight = 80;
-                double targetY = SystemParameters.WorkArea.Bottom - windowHeight - margin - (_activeNotifications.Count * (windowHeight + spacing));
+                _activeNotifications.Remove(notification);
+                RearrangeNotifications();
+            };
 
-                var notification = new NotificationWindow(title, message, targetY);
-                
-                notification.Closed += (s, e) =>
-                {
-                    lock (_lock)
-                    {
-                        _activeNotifications.Remove(notification);
-                        RearrangeNotifications();
-                    }
-                };
-
-                _activeNotifications.Add(notification);
-                notification.Show();
-            }
+            _activeNotifications.Add(notification);
+            notification.Show();
         });
     }
 
