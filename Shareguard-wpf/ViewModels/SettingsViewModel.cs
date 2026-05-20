@@ -57,12 +57,12 @@ public partial class SettingsViewModel : ObservableObject
         _hotkeyService = hotkeyService;
         _currentSettings = _settingsService.Load();
 
-        // Populate properties from loaded settings
-        IsClipboardMonitorEnabled = _currentSettings.IsClipboardMonitorEnabled;
-        ShowCleanNotifications = _currentSettings.ShowCleanNotifications;
-        GlobalHotkey = _currentSettings.GlobalHotkey;
-        UseOriginalDirectory = _currentSettings.UseOriginalDirectory;
-        CustomOutputDirectory = _currentSettings.CustomOutputDirectory;
+        // Populate backing fields from loaded settings directly to avoid triggering OnChanged methods during initialization
+        _isClipboardMonitorEnabled = _currentSettings.IsClipboardMonitorEnabled;
+        _showCleanNotifications = _currentSettings.ShowCleanNotifications;
+        _globalHotkey = _currentSettings.GlobalHotkey;
+        _useOriginalDirectory = _currentSettings.UseOriginalDirectory;
+        _customOutputDirectory = _currentSettings.CustomOutputDirectory;
         UpdateOutputDirectoryDisplay();
     }
 
@@ -172,7 +172,14 @@ public partial class SettingsViewModel : ObservableObject
 
     private void SaveAndNotify()
     {
-        _settingsService.Save(_currentSettings);
-        SettingsChanged?.Invoke(_currentSettings);
+        try
+        {
+            _settingsService.Save(_currentSettings);
+            SettingsChanged?.Invoke(_currentSettings);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Error saving settings: {ex.Message}";
+        }
     }
 }
