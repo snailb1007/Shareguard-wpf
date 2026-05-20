@@ -25,6 +25,7 @@ public partial class App : System.Windows.Application
 
         // Presentation layer registrations
         builder.Services.AddSingleton<IClipboardMonitorService, WindowsClipboardMonitorService>();
+        builder.Services.AddSingleton<INotificationService, NotificationService>();
         builder.Services.AddSingleton<MainViewModel>();
         builder.Services.AddSingleton<MainWindow>();
 
