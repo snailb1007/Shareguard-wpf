@@ -28,9 +28,6 @@ public static class DependencyInjection
         // Register repository
         services.AddSingleton<IHistoryRepository, HistoryRepository>();
 
-        // Temporarily keep LocalHistoryLogger until deleted in Task 6
-        services.AddSingleton<LocalHistoryLogger>();
-
         return services;
     }
 }
