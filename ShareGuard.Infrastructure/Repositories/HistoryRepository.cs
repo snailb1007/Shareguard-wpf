@@ -9,14 +9,9 @@ namespace ShareGuard.Infrastructure.Repositories;
 /// EF Core implementation of IHistoryRepository. Uses DbContextFactory to ensure thread safety
 /// when multiple operations are processed in parallel.
 /// </summary>
-public class HistoryRepository : IHistoryRepository
+public class HistoryRepository(IDbContextFactory<ShareGuardDbContext> contextFactory) : IHistoryRepository
 {
-    private readonly IDbContextFactory<ShareGuardDbContext> _contextFactory;
-
-    public HistoryRepository(IDbContextFactory<ShareGuardDbContext> contextFactory)
-    {
-        _contextFactory = contextFactory;
-    }
+    private readonly IDbContextFactory<ShareGuardDbContext> _contextFactory = contextFactory;
 
     public async Task AddAsync(HistoryEvent historyEvent, CancellationToken cancellationToken = default)
     {

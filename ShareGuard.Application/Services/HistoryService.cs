@@ -6,16 +6,11 @@ using ShareGuard.Domain.Interfaces;
 
 namespace ShareGuard.Application.Services;
 
-public class HistoryService : IHistoryService
+public class HistoryService(IHistoryRepository historyRepository) : IHistoryService
 {
-    private readonly IHistoryRepository _historyRepository;
+    private readonly IHistoryRepository _historyRepository = historyRepository;
 
-    public HistoryService(IHistoryRepository historyRepository)
-    {
-        _historyRepository = historyRepository;
-    }
-
-    public async Task LogHistoryAsync(LogHistoryCommand command, CancellationToken cancellationToken = default)
+    public Task LogHistoryAsync(LogHistoryCommand command, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(command);
 
@@ -31,26 +26,26 @@ public class HistoryService : IHistoryService
             ErrorMessage = command.ErrorMessage
         };
 
-        await _historyRepository.AddAsync(historyEvent, cancellationToken);
+        return _historyRepository.AddAsync(historyEvent, cancellationToken);
     }
 
-    public async Task<IEnumerable<HistoryEvent>> GetHistoryAsync(GetHistoryQuery query, CancellationToken cancellationToken = default)
+    public Task<IEnumerable<HistoryEvent>> GetHistoryAsync(GetHistoryQuery query, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(query);
 
         if (query.PageNumber <= 0) throw new ArgumentException("Page number must be positive.", nameof(query));
         if (query.PageSize <= 0) throw new ArgumentException("Page size must be positive.", nameof(query));
 
-        return await _historyRepository.GetPagedAsync(query.PageNumber, query.PageSize, cancellationToken);
+        return _historyRepository.GetPagedAsync(query.PageNumber, query.PageSize, cancellationToken);
     }
 
-    public async Task<int> GetTotalCountAsync(CancellationToken cancellationToken = default)
+    public Task<int> GetTotalCountAsync(CancellationToken cancellationToken = default)
     {
-        return await _historyRepository.GetTotalCountAsync(cancellationToken);
+        return _historyRepository.GetTotalCountAsync(cancellationToken);
     }
 
-    public async Task ClearHistoryAsync(CancellationToken cancellationToken = default)
+    public Task ClearHistoryAsync(CancellationToken cancellationToken = default)
     {
-        await _historyRepository.ClearAllAsync(cancellationToken);
+        return _historyRepository.ClearAllAsync(cancellationToken);
     }
 }
