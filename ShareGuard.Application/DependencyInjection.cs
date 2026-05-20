@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using ShareGuard.Application.Interfaces;
 using ShareGuard.Application.Services;
 using ShareGuard.Domain.Interfaces;
 
@@ -10,7 +11,12 @@ public static class DependencyInjection
     {
         services.AddSingleton<IImageCleanupService, ImageCleanupService>();
         services.AddSingleton<IUrlCleanerService, UrlCleanerService>();
+
+        // Register history service
+        services.AddSingleton<IHistoryService, HistoryService>();
+
         return services;
     }
 }
+
 
