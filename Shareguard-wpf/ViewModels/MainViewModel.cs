@@ -4,6 +4,7 @@ using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
+using ShareGuard.App.Services;
 using ShareGuard.Application.Services;
 using ShareGuard.Domain.Models;
 
@@ -19,6 +20,8 @@ public enum AppState
 public partial class MainViewModel : ObservableObject
 {
     private readonly IImageCleanupService _cleanupService;
+    private readonly IClipboardMonitorService _clipboardMonitorService;
+    private readonly INotificationService _notificationService;
 
     [ObservableProperty]
     private string _title = "ShareGuard";
@@ -43,9 +46,21 @@ public partial class MainViewModel : ObservableObject
     // Grouped findings for UI display (category → findings)
     public ObservableCollection<FindingGroup> FindingGroups { get; } = [];
 
-    public MainViewModel(IImageCleanupService cleanupService)
+    public MainViewModel(
+        IImageCleanupService cleanupService,
+        IClipboardMonitorService clipboardMonitorService,
+        INotificationService notificationService)
     {
         _cleanupService = cleanupService;
+        _clipboardMonitorService = clipboardMonitorService;
+        _notificationService = notificationService;
+
+        _clipboardMonitorService.UrlCleaned += ClipboardMonitorService_UrlCleaned;
+    }
+
+    private void ClipboardMonitorService_UrlCleaned(string originalUrl, string cleanedUrl, int removedCount)
+    {
+        _notificationService.ShowNotification("URL Cleaned", $"Removed {removedCount} tracking parameter(s).");
     }
 
     [RelayCommand]

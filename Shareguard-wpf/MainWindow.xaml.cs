@@ -1,7 +1,9 @@
+using System;
 using System.ComponentModel;
 using System.Windows;
-using Wpf.Ui.Controls;
+using ShareGuard.App.Services;
 using ShareGuard.App.ViewModels;
+using Wpf.Ui.Controls;
 
 namespace ShareGuard.App;
 
@@ -11,12 +13,14 @@ namespace ShareGuard.App;
 public partial class MainWindow : FluentWindow
 {
     private readonly MainViewModel _viewModel;
+    private readonly IClipboardMonitorService _clipboardMonitorService;
 
-    public MainWindow(MainViewModel viewModel)
+    public MainWindow(MainViewModel viewModel, IClipboardMonitorService clipboardMonitorService)
     {
         InitializeComponent();
         DataContext = viewModel;
         _viewModel = viewModel;
+        _clipboardMonitorService = clipboardMonitorService;
 
         // Listen for state changes to toggle panel visibility
         _viewModel.PropertyChanged += ViewModel_PropertyChanged;
@@ -101,5 +105,18 @@ public partial class MainWindow : FluentWindow
             }
         }
         e.Handled = true;
+    }
+
+    protected override void OnSourceInitialized(EventArgs e)
+    {
+        base.OnSourceInitialized(e);
+        var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+        _clipboardMonitorService.StartMonitoring(hwnd);
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        _clipboardMonitorService.StopMonitoring();
+        base.OnClosed(e);
     }
 }
