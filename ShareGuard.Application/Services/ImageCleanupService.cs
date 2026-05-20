@@ -104,9 +104,27 @@ public sealed class ImageCleanupService : IImageCleanupService
         {
             try
             {
-                if (!string.IsNullOrEmpty(destPath) && File.Exists(destPath))
+                if (!string.IsNullOrEmpty(destPath))
                 {
-                    File.Delete(destPath);
+                    for (int i = 0; i < 5; i++)
+                    {
+                        if (File.Exists(destPath))
+                        {
+                            try
+                            {
+                                File.Delete(destPath);
+                                break;
+                            }
+                            catch (IOException)
+                            {
+                                Task.Delay(10).Wait();
+                            }
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
                 }
             }
             catch
