@@ -9,11 +9,11 @@ namespace ShareGuard.Application.Services;
 
 public class MultiFileProcessorService : IMultiFileProcessorService
 {
-    private readonly IImageCleanupService _imageCleanupService;
+    private readonly IFileCleanupService _fileCleanupService;
 
-    public MultiFileProcessorService(IImageCleanupService imageCleanupService)
+    public MultiFileProcessorService(IFileCleanupService fileCleanupService)
     {
-        _imageCleanupService = imageCleanupService;
+        _fileCleanupService = fileCleanupService;
     }
 
     public async Task ProcessFilesAsync(
@@ -45,7 +45,7 @@ public class MultiFileProcessorService : IMultiFileProcessorService
 
             try
             {
-                var result = await _imageCleanupService.CleanAsync(filePath, ct);
+                var result = await _fileCleanupService.CleanFileAsync(filePath, ct);
                 success = result.IsSuccess;
                 cleanPath = result.CleanFilePath ?? string.Empty;
                 findingsCount = result.Findings.Count;

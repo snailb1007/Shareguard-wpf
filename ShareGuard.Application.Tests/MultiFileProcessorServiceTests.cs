@@ -35,7 +35,7 @@ public class MultiFileProcessorServiceTests
     public async Task ProcessFilesAsync_WithEmptyList_ShouldReturnImmediately()
     {
         // Arrange
-        var mockCleanupService = Substitute.For<IImageCleanupService>();
+        var mockCleanupService = Substitute.For<IFileCleanupService>();
         var service = new MultiFileProcessorService(mockCleanupService);
         var reported = new List<ProcessingStatus>();
         var progress = new SyncProgress<ProcessingStatus>(reported.Add);
@@ -45,22 +45,22 @@ public class MultiFileProcessorServiceTests
 
         // Assert
         Assert.Empty(reported);
-        await mockCleanupService.DidNotReceiveWithAnyArgs().CleanAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await mockCleanupService.DidNotReceiveWithAnyArgs().CleanFileAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task ProcessFilesAsync_WithMultipleFiles_ShouldProcessInParallelAndReportProgress()
     {
         // Arrange
-        var mockCleanupService = Substitute.For<IImageCleanupService>();
+        var mockCleanupService = Substitute.For<IFileCleanupService>();
         var service = new MultiFileProcessorService(mockCleanupService);
         var files = new List<string> { "file1.png", "file2.jpg", "file3.webp" };
 
-        mockCleanupService.CleanAsync("file1.png", Arg.Any<CancellationToken>())
+        mockCleanupService.CleanFileAsync("file1.png", Arg.Any<CancellationToken>())
             .Returns(StripResult.Success("file1.clean.png", Array.Empty<Finding>(), TimeSpan.FromMilliseconds(10)));
-        mockCleanupService.CleanAsync("file2.jpg", Arg.Any<CancellationToken>())
+        mockCleanupService.CleanFileAsync("file2.jpg", Arg.Any<CancellationToken>())
             .Returns(StripResult.Success("file2.clean.jpg", Array.Empty<Finding>(), TimeSpan.FromMilliseconds(20)));
-        mockCleanupService.CleanAsync("file3.webp", Arg.Any<CancellationToken>())
+        mockCleanupService.CleanFileAsync("file3.webp", Arg.Any<CancellationToken>())
             .Returns(StripResult.Success("file3.clean.webp", Array.Empty<Finding>(), TimeSpan.FromMilliseconds(30)));
 
         var reported = new List<ProcessingStatus>();
@@ -89,11 +89,11 @@ public class MultiFileProcessorServiceTests
     public async Task ProcessFilesAsync_WhenServiceThrowsException_ShouldCatchAndReportError()
     {
         // Arrange
-        var mockCleanupService = Substitute.For<IImageCleanupService>();
+        var mockCleanupService = Substitute.For<IFileCleanupService>();
         var service = new MultiFileProcessorService(mockCleanupService);
         var files = new List<string> { "corrupt.png" };
 
-        mockCleanupService.CleanAsync("corrupt.png", Arg.Any<CancellationToken>())
+        mockCleanupService.CleanFileAsync("corrupt.png", Arg.Any<CancellationToken>())
             .Returns(_ => Task.FromException<StripResult>(new InvalidOperationException("Metadata is corrupt")));
 
         var reported = new List<ProcessingStatus>();
@@ -116,11 +116,11 @@ public class MultiFileProcessorServiceTests
     public async Task ProcessFilesAsync_WhenCleanAsyncReturnsFailure_ShouldReportFailureAndErrorMessage()
     {
         // Arrange
-        var mockCleanupService = Substitute.For<IImageCleanupService>();
+        var mockCleanupService = Substitute.For<IFileCleanupService>();
         var service = new MultiFileProcessorService(mockCleanupService);
         var files = new List<string> { "unsupported.gif" };
 
-        mockCleanupService.CleanAsync("unsupported.gif", Arg.Any<CancellationToken>())
+        mockCleanupService.CleanFileAsync("unsupported.gif", Arg.Any<CancellationToken>())
             .Returns(StripResult.Failure("Unsupported format"));
 
         var reported = new List<ProcessingStatus>();
@@ -142,7 +142,7 @@ public class MultiFileProcessorServiceTests
     public async Task ProcessFilesAsync_WithCancellation_ShouldCancelProcessing()
     {
         // Arrange
-        var mockCleanupService = Substitute.For<IImageCleanupService>();
+        var mockCleanupService = Substitute.For<IFileCleanupService>();
         var service = new MultiFileProcessorService(mockCleanupService);
         var files = new List<string> { "file1.png", "file2.jpg" };
 
@@ -161,7 +161,7 @@ public class MultiFileProcessorServiceTests
     public async Task ProcessFilesAsync_WithNullFilePaths_ShouldThrowArgumentNullException()
     {
         // Arrange
-        var mockCleanupService = Substitute.For<IImageCleanupService>();
+        var mockCleanupService = Substitute.For<IFileCleanupService>();
         var service = new MultiFileProcessorService(mockCleanupService);
         var progress = new SyncProgress<ProcessingStatus>(_ => { });
 
