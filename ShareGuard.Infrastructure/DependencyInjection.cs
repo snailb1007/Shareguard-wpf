@@ -23,7 +23,7 @@ public static class DependencyInjection
 
         // Add context factory to guarantee thread safety during parallel operations
         services.AddDbContextFactory<ShareGuardDbContext>(options =>
-            options.UseSqlite($"Data Source={dbPath};Busy Timeout=5000"));
+            options.UseSqlite($"Data Source={dbPath};Default Timeout=5"));
 
         // Register repository
         services.AddSingleton<IHistoryRepository, HistoryRepository>();

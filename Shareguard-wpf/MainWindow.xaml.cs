@@ -21,6 +21,8 @@ public partial class MainWindow : FluentWindow
         DataContext = viewModel;
         _viewModel = viewModel;
         _clipboardMonitorService = clipboardMonitorService;
+
+        Loaded += async (s, e) => await _viewModel.LoadedCommand.ExecuteAsync(null);
     }
 
     private void Window_DragOver(object sender, DragEventArgs e)
