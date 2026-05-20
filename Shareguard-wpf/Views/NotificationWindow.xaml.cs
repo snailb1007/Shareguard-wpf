@@ -74,9 +74,6 @@ public partial class NotificationWindow : Window
 
     private void FadeOutAndClose()
     {
-        // Disable animations from overriding final values before closing
-        BeginAnimation(LeftProperty, null);
-
         var fadeOutAnim = new DoubleAnimation
         {
             From = Opacity,
