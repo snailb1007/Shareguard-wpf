@@ -18,6 +18,7 @@ public sealed class HotkeyService : IHotkeyService
     private const uint MOD_CONTROL = 0x0002;
     private const uint MOD_SHIFT = 0x0004;
     private const uint MOD_WIN = 0x0008;
+    private const uint MOD_NOREPEAT = 0x4000;
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
@@ -60,7 +61,7 @@ public sealed class HotkeyService : IHotkeyService
             return false;
         }
 
-        if (!RegisterHotKey(hwnd, HOTKEY_ID, modifiers, vk))
+        if (!RegisterHotKey(hwnd, HOTKEY_ID, modifiers | MOD_NOREPEAT, vk))
         {
             _hwndSource = null;
             return false;
@@ -86,7 +87,14 @@ public sealed class HotkeyService : IHotkeyService
 
         if (_hwndSource != null)
         {
-            _hwndSource.RemoveHook(HwndHook);
+            try
+            {
+                _hwndSource.RemoveHook(HwndHook);
+            }
+            catch (ObjectDisposedException)
+            {
+                // HwndSource is already disposed
+            }
             _hwndSource = null;
         }
 
@@ -186,6 +194,12 @@ public sealed class HotkeyService : IHotkeyService
                 // Unknown modifier
                 return false;
             }
+        }
+
+        // Enforce that at least one modifier key is registered to prevent hijacking a single key system-wide
+        if (modifiers == 0)
+        {
+            return false;
         }
 
         return true;
