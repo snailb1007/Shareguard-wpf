@@ -407,7 +407,125 @@ public partial class MainViewModel : ObservableObject, IDisposable
         }
     }
 
+    /// <summary>
+    /// Cleans the current clipboard content. Called from the tray menu and global hotkey.
+    /// Works even when the main window is hidden.
+    /// </summary>
+    public async Task CleanClipboardFromTrayAsync()
+    {
+        string? text = null;
+        var dispatcher = System.Windows.Application.Current?.Dispatcher;
 
+        try
+        {
+            if (dispatcher != null)
+            {
+                text = dispatcher.Invoke(() => System.Windows.Clipboard.ContainsText() ? System.Windows.Clipboard.GetText() : null);
+            }
+            else
+            {
+                // Fallback for testing environments
+                text = System.Windows.Clipboard.ContainsText() ? System.Windows.Clipboard.GetText() : null;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to read from clipboard: {ex}");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(text)) return;
+
+        string trimmed = text.Trim();
+
+        // Must be a URL
+        if (!trimmed.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
+            !trimmed.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        if (_urlCleaner.CleanUrl(trimmed, out string cleanUrl, out int removedCount))
+        {
+            try
+            {
+                if (dispatcher != null)
+                {
+                    dispatcher.Invoke(() => System.Windows.Clipboard.SetText(cleanUrl));
+                }
+                else
+                {
+                    System.Windows.Clipboard.SetText(cleanUrl);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to write to clipboard: {ex}");
+                return;
+            }
+
+            // Update UI properties
+            if (dispatcher != null)
+            {
+                dispatcher.Invoke(() =>
+                {
+                    BeforeUrl = trimmed;
+                    AfterUrl = cleanUrl;
+                    RemovedCount = removedCount;
+                    ShowResults = true;
+                    StatusMessage = $"Clipboard cleaned! {removedCount} tracking parameter(s) removed.";
+                });
+            }
+            else
+            {
+                BeforeUrl = trimmed;
+                AfterUrl = cleanUrl;
+                RemovedCount = removedCount;
+                ShowResults = true;
+                StatusMessage = $"Clipboard cleaned! {removedCount} tracking parameter(s) removed.";
+            }
+
+            // Log to database asynchronously on calling thread (outside dispatcher)
+            try
+            {
+                await _historyService.LogHistoryAsync(new LogHistoryCommand(
+                    FileName: "Clipboard URL (hotkey)",
+                    OriginalPath: trimmed,
+                    CleanPath: cleanUrl,
+                    FindingsCount: removedCount,
+                    IsSuccess: true
+                ));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to log history: {ex}");
+                if (dispatcher != null)
+                {
+                    dispatcher.Invoke(() => StatusMessage = $"Clipboard cleaned! (History logging error: {ex.Message})");
+                }
+                else
+                {
+                    StatusMessage = $"Clipboard cleaned! (History logging error: {ex.Message})";
+                }
+            }
+
+            // Reload history asynchronously
+            try
+            {
+                await LoadHistoryAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to load history: {ex}");
+            }
+
+            _notification.ShowNotification("Clipboard Cleaned", $"Removed {removedCount} tracking parameter(s).");
+        }
+        else
+        {
+            _notification.ShowNotification("Clipboard Cleaned", "No tracking parameters found.");
+        }
+    }
 
     public void Dispose()
     {
