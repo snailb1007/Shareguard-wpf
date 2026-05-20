@@ -73,4 +73,37 @@ public class UrlCleanerServiceTests
         Assert.Equal(url, cleanUrl);
         Assert.Equal(0, removedCount);
     }
+
+    [Theory]
+    [InlineData("https://example.com/page?utm_source=xyz#section", "https://example.com/page#section", 1)]
+    [InlineData("http://example.com?utm_medium=email&keep=1#/route/path?utm_source=abc", "http://example.com?keep=1#/route/path?utm_source=abc", 1)]
+    [InlineData("https://site.org/#/path?utm_source=xyz", "https://site.org/#/path?utm_source=xyz", 0)]
+    public void CleanUrl_WithFragments_ShouldPreserveFragments(string dirtyUrl, string expectedCleanUrl, int expectedRemovedCount)
+    {
+        var result = _service.CleanUrl(dirtyUrl, out var cleanUrl, out var removedCount);
+
+        if (expectedRemovedCount > 0)
+        {
+            Assert.True(result);
+        }
+        else
+        {
+            Assert.False(result);
+        }
+        Assert.Equal(expectedCleanUrl, cleanUrl);
+        Assert.Equal(expectedRemovedCount, removedCount);
+    }
+
+    [Theory]
+    [InlineData("not-a-url")]
+    [InlineData("http://[invalid]")]
+    [InlineData("https://")]
+    public void CleanUrl_WithMalformedOrInvalidUrl_ShouldReturnFalseAndOriginalUrl(string url)
+    {
+        var result = _service.CleanUrl(url, out var cleanUrl, out var removedCount);
+
+        Assert.False(result);
+        Assert.Equal(url, cleanUrl);
+        Assert.Equal(0, removedCount);
+    }
 }
