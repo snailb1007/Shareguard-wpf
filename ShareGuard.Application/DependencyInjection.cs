@@ -15,6 +15,9 @@ public static class DependencyInjection
         // Register history service
         services.AddSingleton<IHistoryService, HistoryService>();
 
+        // Register parallel multi-file processor service
+        services.AddSingleton<IMultiFileProcessorService, MultiFileProcessorService>();
+
         return services;
     }
 }
