@@ -51,7 +51,7 @@ Input (Dropped File / Clipboard URL)
 - **UI Framework**: WPF (fluent layout)
 - **MVVM Toolkit**: `CommunityToolkit.Mvvm` 8.4
 - **DI & Host Lifecycle**: `Microsoft.Extensions.Hosting` & `Microsoft.Extensions.DependencyInjection` 10.0
-- **Image Processing**: `SixLabors.ImageSharp` 3.x
+- **Image Processing**: `SixLabors.ImageSharp` 4.x
 - **Unit Testing**: `xunit.v3` 1.1
 
 ---

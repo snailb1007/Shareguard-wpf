@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Flurl;
 using ShareGuard.Domain.Interfaces;
 
@@ -57,11 +55,11 @@ public sealed class UrlCleanerService : IUrlCleanerService
 
             // Find all parameters matching our tracking parameters list (case-insensitively)
             var matchingParams = new List<string>();
-            foreach (var qp in url.QueryParams)
+            foreach (var (Name, Value) in url.QueryParams)
             {
-                if (qp.Name != null && TrackingParams.Contains(qp.Name))
+                if (Name != null && TrackingParams.Contains(Name))
                 {
-                    matchingParams.Add(qp.Name);
+                    matchingParams.Add(Name);
                 }
             }
 

@@ -469,7 +469,7 @@ For a lean v1.0, minimize external tool dependencies:
 <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="4.*" />
 
 <!-- Strippers -->
-<PackageReference Include="SixLabors.ImageSharp" Version="3.*" />
+<PackageReference Include="SixLabors.ImageSharp" Version="4.0.0" />
 <PackageReference Include="MetadataExtractor" Version="2.*" />
 <PackageReference Include="SharpMp4Parser" Version="1.*" />
 
