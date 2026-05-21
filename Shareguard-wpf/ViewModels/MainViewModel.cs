@@ -1,7 +1,3 @@
-using System;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ShareGuard.App.Services;
@@ -9,9 +5,9 @@ using ShareGuard.Application.Commands;
 using ShareGuard.Application.Interfaces;
 using ShareGuard.Application.Queries;
 using ShareGuard.Application.Services;
-using ShareGuard.Domain.Entities;
 using ShareGuard.Domain.Interfaces;
-using ShareGuard.Domain.Models;
+using System.Collections.ObjectModel;
+using System.IO;
 
 namespace ShareGuard.App.ViewModels;
 
@@ -67,10 +63,10 @@ public partial class MainViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private bool _showBatchResults;
 
-    public ObservableCollection<BatchItemResultViewModel> CurrentBatchResults { get; } = new();
+    public ObservableCollection<BatchItemResultViewModel> CurrentBatchResults { get; } = [];
 
     // History Database properties (Phase 3)
-    public ObservableCollection<HistoryEventViewModel> HistoryEvents { get; } = new();
+    public ObservableCollection<HistoryEventViewModel> HistoryEvents { get; } = [];
 
     [ObservableProperty]
     private int _currentHistoryPage = 1;
