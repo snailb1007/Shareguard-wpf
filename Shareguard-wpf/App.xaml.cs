@@ -155,13 +155,13 @@ public partial class App : System.Windows.Application
         mainWindow.Show();
     }
 
-    private void ApplicationExit(object sender, ExitEventArgs e)
+    private async void ApplicationExit(object sender, ExitEventArgs e)
     {
         _trayIconService?.Dispose();
 
         if (_host is not null)
         {
-            _host.StopAsync().GetAwaiter().GetResult();
+            await _host.StopAsync();
             _host.Dispose();
         }
     }

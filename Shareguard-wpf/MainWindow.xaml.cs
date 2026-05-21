@@ -45,9 +45,9 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     /// </summary>
     public void NavigateToSettings()
     {
-        if (MainTabControl != null && MainTabControl.Items.Count >= 3)
+        if (MainTabControl != null && SettingsTabItem != null)
         {
-            MainTabControl.SelectedIndex = 2; // Settings tab is the 3rd tab
+            MainTabControl.SelectedItem = SettingsTabItem;
         }
     }
 

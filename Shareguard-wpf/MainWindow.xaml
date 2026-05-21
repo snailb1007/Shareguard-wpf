@@ -559,7 +559,7 @@
             </TabItem>
 
             <!-- SETTINGS TAB -->
-            <TabItem Header="Settings" Style="{StaticResource ModernTabItem}">
+            <TabItem x:Name="SettingsTabItem" Header="Settings" Style="{StaticResource ModernTabItem}">
                 <ScrollViewer Margin="0,16,0,0" VerticalScrollBarVisibility="Auto">
                     <Grid MaxWidth="600" HorizontalAlignment="Left">
                         <Grid.RowDefinitions>
@@ -619,7 +619,7 @@
                                         <ColumnDefinition Width="12" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBox Grid.Column="0" Style="{StaticResource ModernTextBox}" Text="{Binding Settings.GlobalHotkey, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBox Grid.Column="0" Style="{StaticResource ModernTextBox}" Text="{Binding Settings.GlobalHotkey, UpdateSourceTrigger=LostFocus}" />
                                     <TextBlock Grid.Column="2" Text="{Binding Settings.HotkeyStatus}" Foreground="{Binding Settings.HotkeyStatusColor}" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="13"/>
                                 </Grid>
                                 

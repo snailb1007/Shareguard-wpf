@@ -9,6 +9,7 @@ namespace ShareGuard.Application.Services;
 public sealed class SettingsService : ISettingsService
 {
     private readonly string _filePath;
+    private AppSettings? _cachedSettings;
 
     public SettingsService(string? filePath = null)
     {
@@ -20,20 +21,28 @@ public sealed class SettingsService : ISettingsService
 
     public AppSettings Load()
     {
+        if (_cachedSettings is not null)
+        {
+            return Clone(_cachedSettings);
+        }
+
         try
         {
             if (!File.Exists(_filePath))
             {
-                return new AppSettings();
+                _cachedSettings = new AppSettings();
+                return Clone(_cachedSettings);
             }
 
             var json = File.ReadAllText(_filePath);
-            return JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
+            _cachedSettings = JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
+            return Clone(_cachedSettings);
         }
         catch
         {
             // Fallback gracefully on parsing errors
-            return new AppSettings();
+            _cachedSettings = new AppSettings();
+            return Clone(_cachedSettings);
         }
     }
 
@@ -49,10 +58,21 @@ public sealed class SettingsService : ISettingsService
 
             var json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(_filePath, json);
+            _cachedSettings = Clone(settings);
         }
         catch (Exception ex)
         {
             throw new InvalidOperationException($"Failed to save settings to {_filePath}", ex);
         }
     }
+
+    private static AppSettings Clone(AppSettings settings)
+        => new()
+        {
+            IsClipboardMonitorEnabled = settings.IsClipboardMonitorEnabled,
+            ShowCleanNotifications = settings.ShowCleanNotifications,
+            GlobalHotkey = settings.GlobalHotkey,
+            CustomOutputDirectory = settings.CustomOutputDirectory,
+            UseOriginalDirectory = settings.UseOriginalDirectory
+        };
 }

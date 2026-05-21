@@ -76,6 +76,21 @@ public class SettingsServiceTests : IDisposable
     }
 
     [Fact]
+    public void Load_AfterFirstRead_UsesCachedSettings()
+    {
+        File.WriteAllText(_settingsPath, """{"GlobalHotkey":"Ctrl+Alt+S"}""");
+
+        var service = new SettingsService(_settingsPath);
+        var first = service.Load();
+
+        File.WriteAllText(_settingsPath, """{"GlobalHotkey":"Ctrl+F12"}""");
+        var second = service.Load();
+
+        Assert.Equal("Ctrl+Alt+S", first.GlobalHotkey);
+        Assert.Equal("Ctrl+Alt+S", second.GlobalHotkey);
+    }
+
+    [Fact]
     public void Save_CreatesDirectoryIfNotExists()
     {
         var deepPath = Path.Combine(_tempDir, "sub", "deep", "settings.json");

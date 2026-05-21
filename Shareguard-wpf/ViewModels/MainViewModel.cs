@@ -350,65 +350,80 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
         try
         {
-            // Log to database on background thread first
+            await CompleteUrlCleanAsync(
+                before,
+                after,
+                count,
+                "Clipboard URL",
+                $"Auto-cleaned! {count} tracking parameter(s) stripped from clipboard.",
+                ex => $"Auto-cleaned! (History logging error: {ex.Message})",
+                "URL Cleaned",
+                $"Removed {count} tracking parameter(s)");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Clipboard monitor clean error: {ex}");
+        }
+    }
+
+    private async Task CompleteUrlCleanAsync(
+        string before,
+        string after,
+        int count,
+        string historyFileName,
+        string successStatus,
+        Func<Exception, string> historyErrorStatus,
+        string notificationTitle,
+        string notificationMessage)
+    {
+        Exception? historyError = null;
+
+        try
+        {
             await _historyService.LogHistoryAsync(new LogHistoryCommand(
-                FileName: "Clipboard URL",
+                FileName: historyFileName,
                 OriginalPath: before,
                 CleanPath: after,
                 FindingsCount: count,
                 IsSuccess: true
             ));
-
-            var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher != null)
-            {
-                // Marshal to UI thread and await completion of the task
-                await dispatcher.Invoke(async () =>
-                {
-                    BeforeUrl = before;
-                    AfterUrl = after;
-                    RemovedCount = count;
-                    ShowResults = true;
-                    StatusMessage = $"Auto-cleaned! {count} tracking parameter(s) stripped from clipboard.";
-                    await LoadHistoryAsync();
-                });
-            }
-            else
-            {
-                // Fallback when dispatcher is null (e.g. running in unit tests)
-                BeforeUrl = before;
-                AfterUrl = after;
-                RemovedCount = count;
-                ShowResults = true;
-                StatusMessage = $"Auto-cleaned! {count} tracking parameter(s) stripped from clipboard.";
-                await LoadHistoryAsync();
-            }
-
-            _notification.ShowNotification("URL Cleaned", $"Removed {count} tracking parameter(s)");
         }
         catch (Exception ex)
         {
-            var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher != null)
-            {
-                dispatcher.Invoke(() =>
-                {
-                    BeforeUrl = before;
-                    AfterUrl = after;
-                    RemovedCount = count;
-                    ShowResults = true;
-                    StatusMessage = $"Auto-cleaned! (History logging error: {ex.Message})";
-                });
-            }
-            else
-            {
-                BeforeUrl = before;
-                AfterUrl = after;
-                RemovedCount = count;
-                ShowResults = true;
-                StatusMessage = $"Auto-cleaned! (History logging error: {ex.Message})";
-            }
+            historyError = ex;
+            System.Diagnostics.Debug.WriteLine($"Failed to log history: {ex}");
         }
+
+        var statusMessage = historyError is null
+            ? successStatus
+            : historyErrorStatus(historyError);
+
+        await UpdateUrlCleanResultAsync(before, after, count, statusMessage);
+        _notification.ShowNotification(notificationTitle, notificationMessage);
+    }
+
+    private Task UpdateUrlCleanResultAsync(string before, string after, int count, string statusMessage)
+        => InvokeOnUiThreadAsync(async () =>
+        {
+            BeforeUrl = before;
+            AfterUrl = after;
+            RemovedCount = count;
+            ShowResults = true;
+            StatusMessage = statusMessage;
+            await LoadHistoryAsync();
+        });
+
+    private static async Task InvokeOnUiThreadAsync(Func<Task> action)
+    {
+        var dispatcher = System.Windows.Application.Current?.Dispatcher;
+        if (dispatcher == null || dispatcher.CheckAccess())
+        {
+            await action();
+            return;
+        }
+
+        var dispatchedTask = await dispatcher.InvokeAsync(action);
+        await dispatchedTask;
     }
 
     /// <summary>
@@ -468,62 +483,22 @@ public partial class MainViewModel : ObservableObject, IDisposable
                 return;
             }
 
-            // Update UI properties
-            if (dispatcher != null)
-            {
-                dispatcher.Invoke(() =>
-                {
-                    BeforeUrl = trimmed;
-                    AfterUrl = cleanUrl;
-                    RemovedCount = removedCount;
-                    ShowResults = true;
-                    StatusMessage = $"Clipboard cleaned! {removedCount} tracking parameter(s) removed.";
-                });
-            }
-            else
-            {
-                BeforeUrl = trimmed;
-                AfterUrl = cleanUrl;
-                RemovedCount = removedCount;
-                ShowResults = true;
-                StatusMessage = $"Clipboard cleaned! {removedCount} tracking parameter(s) removed.";
-            }
-
-            // Log to database asynchronously on calling thread (outside dispatcher)
             try
             {
-                await _historyService.LogHistoryAsync(new LogHistoryCommand(
-                    FileName: "Clipboard URL (hotkey)",
-                    OriginalPath: trimmed,
-                    CleanPath: cleanUrl,
-                    FindingsCount: removedCount,
-                    IsSuccess: true
-                ));
+                await CompleteUrlCleanAsync(
+                    trimmed,
+                    cleanUrl,
+                    removedCount,
+                    "Clipboard URL (hotkey)",
+                    $"Clipboard cleaned! {removedCount} tracking parameter(s) removed.",
+                    ex => $"Clipboard cleaned! (History logging error: {ex.Message})",
+                    "Clipboard Cleaned",
+                    $"Removed {removedCount} tracking parameter(s).");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Failed to log history: {ex}");
-                if (dispatcher != null)
-                {
-                    dispatcher.Invoke(() => StatusMessage = $"Clipboard cleaned! (History logging error: {ex.Message})");
-                }
-                else
-                {
-                    StatusMessage = $"Clipboard cleaned! (History logging error: {ex.Message})";
-                }
+                System.Diagnostics.Debug.WriteLine($"Tray/hotkey clean error: {ex}");
             }
-
-            // Reload history asynchronously
-            try
-            {
-                await LoadHistoryAsync();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Failed to load history: {ex}");
-            }
-
-            _notification.ShowNotification("Clipboard Cleaned", $"Removed {removedCount} tracking parameter(s).");
         }
         else
         {

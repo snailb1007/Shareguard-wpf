@@ -23,13 +23,13 @@ public class NotificationService : INotificationService
 
     public void ShowNotification(string title, string message)
     {
-        if (System.Windows.Application.Current == null)
+        var settings = _settingsService.Load();
+        if (!settings.ShowCleanNotifications)
         {
             return;
         }
 
-        var settings = _settingsService.Load();
-        if (!settings.ShowCleanNotifications)
+        if (System.Windows.Application.Current == null)
         {
             return;
         }
