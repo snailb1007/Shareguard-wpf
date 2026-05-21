@@ -5,7 +5,12 @@
     <TargetFramework>net10.0-windows</TargetFramework>
     <RootNamespace>ShareGuard.App</RootNamespace>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>Assets\app_icon.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\app_icon.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ShareGuard.Application\ShareGuard.Application.csproj" />
@@ -17,6 +22,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
     <PackageReference Include="WPF-UI" />
+    <PackageReference Include="H.NotifyIcon.Wpf" />
   </ItemGroup>
 
 </Project>

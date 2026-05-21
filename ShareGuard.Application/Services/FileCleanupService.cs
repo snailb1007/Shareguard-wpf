@@ -11,23 +11,27 @@ public sealed class FileCleanupService : IFileCleanupService
 {
     private readonly IEnumerable<IFileStripper> _strippers;
     private readonly IHistoryService _historyService;
+    private readonly ISettingsService _settingsService;
     private readonly ILogger<FileCleanupService> _logger;
 
     public FileCleanupService(
         IEnumerable<IFileStripper> strippers,
         IHistoryService historyService,
+        ISettingsService settingsService,
         ILogger<FileCleanupService> logger)
     {
         _strippers = strippers;
         _historyService = historyService;
+        _settingsService = settingsService;
         _logger = logger;
     }
 
     // Test-friendly constructor
     internal FileCleanupService(
         IEnumerable<IFileStripper> strippers,
-        IHistoryService historyService)
-        : this(strippers, historyService, Microsoft.Extensions.Logging.Abstractions.NullLogger<FileCleanupService>.Instance)
+        IHistoryService historyService,
+        ISettingsService settingsService)
+        : this(strippers, historyService, settingsService, Microsoft.Extensions.Logging.Abstractions.NullLogger<FileCleanupService>.Instance)
     {
     }
 
@@ -56,7 +60,7 @@ public sealed class FileCleanupService : IFileCleanupService
             return failResult;
         }
 
-        // Generate collision-safe clean path (reuse pattern from ImageCleanupService)
+        // Generate collision-safe clean path
         var cleanPath = GenerateCleanPath(sourcePath);
 
         try
@@ -91,9 +95,32 @@ public sealed class FileCleanupService : IFileCleanupService
         }
     }
 
-    internal static string GenerateCleanPath(string originalPath)
+    internal string GenerateCleanPath(string originalPath)
     {
-        var dir = Path.GetDirectoryName(originalPath) ?? string.Empty;
+        var settings = _settingsService.Load();
+        string dir;
+
+        if (settings.UseOriginalDirectory || string.IsNullOrWhiteSpace(settings.CustomOutputDirectory))
+        {
+            dir = Path.GetDirectoryName(originalPath) ?? string.Empty;
+        }
+        else
+        {
+            dir = settings.CustomOutputDirectory;
+            try
+            {
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to create custom output directory '{Directory}'. Falling back to original directory.", dir);
+                dir = Path.GetDirectoryName(originalPath) ?? string.Empty;
+            }
+        }
+
         var nameWithoutExt = Path.GetFileNameWithoutExtension(originalPath);
         var ext = Path.GetExtension(originalPath);
 

@@ -190,7 +190,7 @@
         </Grid>
 
         <!-- Main Tabbed Panel Layout -->
-        <TabControl Grid.Row="2"
+        <TabControl x:Name="MainTabControl" Grid.Row="2"
                     Background="Transparent"
                     BorderThickness="0"
                     Margin="0,8,0,0">
@@ -556,6 +556,100 @@
                         </StackPanel>
                     </Grid>
                 </Grid>
+            </TabItem>
+
+            <!-- SETTINGS TAB -->
+            <TabItem x:Name="SettingsTabItem" Header="Settings" Style="{StaticResource ModernTabItem}">
+                <ScrollViewer Margin="0,16,0,0" VerticalScrollBarVisibility="Auto">
+                    <Grid MaxWidth="600" HorizontalAlignment="Left">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="16" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="16" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="16" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <!-- 1. Clipboard & Notification Settings -->
+                        <Border Grid.Row="0" Background="#1E293B" CornerRadius="12" Padding="20">
+                            <StackPanel>
+                                <TextBlock Text="Clipboard &amp; Notifications" FontSize="16" FontWeight="SemiBold" Foreground="#F8FAFC" Margin="0,0,0,16"/>
+                                
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="Monitor Clipboard" FontSize="14" FontWeight="Medium" Foreground="#F8FAFC"/>
+                                        <TextBlock Text="Automatically scan clipboard for tracking parameters on copy" FontSize="12" Foreground="#94A3B8" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <CheckBox Grid.Column="1" IsChecked="{Binding Settings.IsClipboardMonitorEnabled}" VerticalAlignment="Center"/>
+                                </Grid>
+
+                                <Border BorderBrush="#334155" BorderThickness="0,1,0,0" Margin="0,8,0,12"/>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="Show Notifications" FontSize="14" FontWeight="Medium" Foreground="#F8FAFC"/>
+                                        <TextBlock Text="Display desktop notifications when files or URLs are cleaned" FontSize="12" Foreground="#94A3B8" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <CheckBox Grid.Column="1" IsChecked="{Binding Settings.ShowCleanNotifications}" VerticalAlignment="Center"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 2. Global Hotkey Settings -->
+                        <Border Grid.Row="2" Background="#1E293B" CornerRadius="12" Padding="20">
+                            <StackPanel>
+                                <TextBlock Text="Global Hotkey" FontSize="16" FontWeight="SemiBold" Foreground="#F8FAFC" Margin="0,0,0,16"/>
+                                
+                                <TextBlock Text="Clean Clipboard Shortcut" FontSize="14" FontWeight="Medium" Foreground="#F8FAFC"/>
+                                <TextBlock Text="Press this hotkey combination to clean your clipboard immediately" FontSize="12" Foreground="#94A3B8" Margin="0,2,0,12" TextWrapping="Wrap"/>
+                                
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="12" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" Style="{StaticResource ModernTextBox}" Text="{Binding Settings.GlobalHotkey, UpdateSourceTrigger=LostFocus}" />
+                                    <TextBlock Grid.Column="2" Text="{Binding Settings.HotkeyStatus}" Foreground="{Binding Settings.HotkeyStatusColor}" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="13"/>
+                                </Grid>
+                                
+                                <TextBlock Text="Example: Ctrl+Shift+G, Alt+C, Ctrl+Alt+F5. Must be in Modifier+Key format." FontSize="11" Foreground="#64748B" Margin="0,6,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 3. Output Folder Settings -->
+                        <Border Grid.Row="4" Background="#1E293B" CornerRadius="12" Padding="20">
+                            <StackPanel>
+                                <TextBlock Text="Output Location" FontSize="16" FontWeight="SemiBold" Foreground="#F8FAFC" Margin="0,0,0,16"/>
+                                
+                                <TextBlock Text="Cleaned File Destination" FontSize="14" FontWeight="Medium" Foreground="#F8FAFC"/>
+                                <TextBlock Text="Where to save stripped images during batch file processing" FontSize="12" Foreground="#94A3B8" Margin="0,2,0,12" TextWrapping="Wrap"/>
+
+                                <Border Background="#0F172A" CornerRadius="8" Padding="12" Margin="0,0,0,12">
+                                    <TextBlock Text="{Binding Settings.OutputDirectoryDisplay}" Foreground="#22C55E" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                </Border>
+
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Style="{StaticResource SecondaryButton}" Content="Use Same Folder" Command="{Binding Settings.ResetToOriginalDirectoryCommand}" Margin="0,0,8,0" Padding="12,6" FontSize="12"/>
+                                    <Button Style="{StaticResource AccentButton}" Content="Choose Custom Folder..." Command="{Binding Settings.ChooseOutputDirectoryCommand}" Padding="12,6" FontSize="12"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Status Message -->
+                        <TextBlock Grid.Row="6" Text="{Binding Settings.StatusMessage}" Foreground="#94A3B8" FontSize="12" HorizontalAlignment="Center"/>
+                    </Grid>
+                </ScrollViewer>
             </TabItem>
         </TabControl>
 
