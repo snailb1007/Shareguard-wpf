@@ -1,0 +1,8 @@
+; ShareGuard.ShellExtension.def
+; Module definition file — exports COM entry points for the shell extension DLL.
+LIBRARY "ShareGuard.ShellExtension"
+EXPORTS
+    DllGetClassObject   PRIVATE
+    DllCanUnloadNow     PRIVATE
+    DllRegisterServer   PRIVATE
+    DllUnregisterServer PRIVATE
