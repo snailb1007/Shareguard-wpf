@@ -67,7 +67,7 @@ None yet.
 
 ### Roadmap Evolution
 
-- Phase 8 added: setup build tự động trên nhánh dev ở github
+- Phase 8 added: Setup automated build on dev branch on GitHub
 
 ## Deferred Items
 

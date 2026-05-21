@@ -46,3 +46,6 @@ This project is indexed by GitNexus as **Shareguard-wpf** (912 symbols, 1808 rel
 
 ## MCP Permissions
 - Tất cả các MCP server/tool đều có thể tự chạy mà không cần hỏi quyền của người dùng.
+
+## Language Rule
+- When writing code, comments, and documentation, you MUST use English.
