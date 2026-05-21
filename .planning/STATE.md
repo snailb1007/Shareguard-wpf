@@ -7,7 +7,7 @@ stopped_at: Phase 05 UI-SPEC approved
 last_updated: "2026-05-20T15:44:31.729Z"
 last_activity: 2026-05-20 -- Phase 05 UI-SPEC approved
 progress:
-  total_phases: 8
+  total_phases: 9
   completed_phases: 0
   total_plans: 2
   completed_plans: 0
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-05-20)
 
 ## Current Position
 
-Phase: 1 of 8 (Image Clean Copy Tracer Bullet)
+Phase: 1 of 9 (Image Clean Copy Tracer Bullet)
 Plan: 0 of 0 in current phase
 Status: Ready to execute
 Last activity: 2026-05-19 -- Phase 1 planning complete
@@ -64,6 +64,10 @@ None yet.
 ### Blockers/Concerns
 
 None yet.
+
+### Roadmap Evolution
+
+- Phase 8 added: setup build tự động trên nhánh dev ở github
 
 ## Deferred Items
 

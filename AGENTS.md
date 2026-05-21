@@ -41,3 +41,8 @@ This project is indexed by GitNexus as **Shareguard-wpf** (912 symbols, 1808 rel
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
 
 <!-- gitnexus:end -->
+
+# Agent Instructions
+
+## MCP Permissions
+- Tất cả các MCP server/tool đều có thể tự chạy mà không cần hỏi quyền của người dùng.
