@@ -82,18 +82,22 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
 
 
+    public SettingsViewModel Settings { get; }
+
     public MainViewModel(
         IUrlCleanerService urlCleaner,
         IClipboardMonitorService clipboardMonitor,
         INotificationService notification,
         IHistoryService historyService,
-        IMultiFileProcessorService multiFileProcessor)
+        IMultiFileProcessorService multiFileProcessor,
+        SettingsViewModel settingsViewModel)
     {
         _urlCleaner = urlCleaner;
         _clipboardMonitor = clipboardMonitor;
         _notification = notification;
         _historyService = historyService;
         _multiFileProcessor = multiFileProcessor;
+        Settings = settingsViewModel;
 
         _clipboardMonitor.UrlCleaned += OnUrlCleaned;
     }
