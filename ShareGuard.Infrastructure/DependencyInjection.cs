@@ -19,9 +19,11 @@ public static class DependencyInjection
         services.AddSingleton<IFileStripper, OfficeOpenXmlStripper>();
         services.AddSingleton<IFileStripper, PdfMetadataStripper>();
 
-        // Place SQLite database in AppData folder
-        string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        string dbFolder = Path.Combine(appData, "ShareGuard");
+        // Resolve the package detector to determine the correct data folder.
+        // PackageDetector has no dependencies so constructing it inline is safe —
+        // the DI container isn't built yet when we're registering services.
+        var detector = new PackageDetector();
+        string dbFolder = detector.AppDataPath;
         string dbPath = Path.Combine(dbFolder, "history.db");
 
         // Ensure directory exists
