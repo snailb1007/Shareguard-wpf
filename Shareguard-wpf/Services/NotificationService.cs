@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media.Animation;
 using ShareGuard.App.Views;
+using ShareGuard.Application.Interfaces;
 
 namespace ShareGuard.App.Services;
 
@@ -13,10 +14,22 @@ namespace ShareGuard.App.Services;
 public class NotificationService : INotificationService
 {
     private readonly List<NotificationWindow> _activeNotifications = new();
+    private readonly ISettingsService _settingsService;
+
+    public NotificationService(ISettingsService settingsService)
+    {
+        _settingsService = settingsService;
+    }
 
     public void ShowNotification(string title, string message)
     {
         if (System.Windows.Application.Current == null)
+        {
+            return;
+        }
+
+        var settings = _settingsService.Load();
+        if (!settings.ShowCleanNotifications)
         {
             return;
         }
