@@ -68,3 +68,19 @@ Desktop.ini
 .serena/
 .claude/
 .planning/
+
+# MSIX signing certificates (sensitive - never commit)
+certs/
+*.pfx
+
+# Build artifacts
+artifacts/
+
+# MSIX Packaging
+*.msix
+*.msixbundle
+*.appx
+*.appxbundle
+*.appxupload
+AppPackages/
+BundleArtifacts/
