@@ -11,6 +11,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
     {
+        services.AddSingleton<IPackageDetector, PackageDetector>();
         services.AddSingleton<IImageCleaner, ImageSharpCleaner>();
 
         // Phase 4 IFileStripper registrations

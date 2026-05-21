@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\ShareGuard.Domain\ShareGuard.Domain.csproj" />
+    <ProjectReference Include="..\ShareGuard.Infrastructure\ShareGuard.Infrastructure.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="xunit.v3" />
