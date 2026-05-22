@@ -52,5 +52,9 @@
     <ProjectReference Include="..\Shareguard-wpf\Shareguard-wpf.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ShareGuard.ShellExtension\ShareGuard.ShellExtension.vcxproj" />
+  </ItemGroup>
+
   <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.targets" />
 </Project>
