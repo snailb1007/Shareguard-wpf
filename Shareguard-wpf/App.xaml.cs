@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Text;
 using System.Windows;
 using System.Windows.Threading;
@@ -136,7 +137,10 @@ public partial class App : System.Windows.Application
             Dispatcher.InvokeAsync(() =>
             {
                 BringWindowToForeground(mainWindow);
-                _ = mainViewModel.ProcessFilesCommand.ExecuteAsync(paths);
+                if (paths.Length > 0)
+                {
+                    _ = mainViewModel.ProcessFilesCommand.ExecuteAsync(paths);
+                }
             });
         };
 
@@ -308,18 +312,27 @@ public partial class App : System.Windows.Application
     /// </summary>
     private static async Task SendPathsToPrimaryInstanceAsync(string[] paths)
     {
-        if (paths.Length == 0) return;
-
         try
         {
-            using var client = new NamedPipeClientStream(".", PipeName, PipeDirection.Out);
+            using var client = new NamedPipeClientStream(
+                ".",
+                PipeName,
+                PipeDirection.Out,
+                PipeOptions.Asynchronous,
+                TokenImpersonationLevel.Identification);
+
             await client.ConnectAsync(3000); // 3-second timeout
 
-            var payload = Encoding.UTF8.GetBytes(string.Join('\n', paths));
+            var payloadText = paths.Length == 0
+                ? NamedPipeListenerService.WakeUpPayload
+                : string.Join('\n', paths);
+            var payload = Encoding.UTF8.GetBytes(payloadText);
             await client.WriteAsync(payload);
             await client.FlushAsync();
 
-            Debug.WriteLine($"[App] Sent {paths.Length} path(s) to primary instance.");
+            Debug.WriteLine(paths.Length == 0
+                ? "[App] Sent wake-up request to primary instance."
+                : $"[App] Sent {paths.Length} path(s) to primary instance.");
         }
         catch (Exception ex)
         {

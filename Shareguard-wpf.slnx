@@ -5,6 +5,7 @@
   <Project Path="Shareguard-wpf/Shareguard-wpf.csproj" />
   <Project Path="ShareGuard.Domain.Tests/ShareGuard.Domain.Tests.csproj" />
   <Project Path="ShareGuard.Application.Tests/ShareGuard.Application.Tests.csproj" />
+  <Project Path="ShareGuard.App.Tests/ShareGuard.App.Tests.csproj" />
   <Project Path="ShareGuard.ShellExtension/ShareGuard.ShellExtension.vcxproj" />
   <Project Path="ShareGuard.Package/ShareGuard.Package.wapproj" Type="{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}" />
 </Solution>
