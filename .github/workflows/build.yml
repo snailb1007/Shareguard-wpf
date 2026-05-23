@@ -1,0 +1,75 @@
+name: CI Build and Test
+
+on:
+  push:
+    branches: [ "dev" ]
+  pull_request:
+    branches: [ "dev" ]
+
+jobs:
+  build-and-test:
+    name: Build & Verify Solution
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+
+    - name: Setup .NET 10.0 SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+        cache: true
+        cache-dependency-path: '**/Directory.Packages.props'
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Restore Solution NuGet Packages
+      run: |
+        msbuild Shareguard-wpf.slnx /t:Restore /p:Configuration=Release /p:Platform=x64 /verbosity:minimal
+
+    - name: Build Entire Solution
+      run: |
+        msbuild Shareguard-wpf.slnx /p:Configuration=Release /p:Platform=x64 /verbosity:minimal
+
+    - name: Run Domain Unit Tests
+      run: |
+        dotnet test ShareGuard.Domain.Tests/ShareGuard.Domain.Tests.csproj --configuration Release --no-build --verbosity normal
+
+    - name: Run Application Unit Tests
+      run: |
+        dotnet test ShareGuard.Application.Tests/ShareGuard.Application.Tests.csproj --configuration Release --no-build --verbosity normal
+
+    - name: Run App Integration Tests
+      run: |
+        dotnet test ShareGuard.App.Tests/ShareGuard.App.Tests.csproj --configuration Release --no-build --verbosity normal
+
+    - name: Generate Temporary Signing Certificate
+      shell: pwsh
+      run: |
+        .\scripts\New-DevCertificate.ps1 -OutputPath "certs" -Password "ShareGuardDev123!"
+
+    - name: Build and Sign MSIX Package
+      shell: pwsh
+      run: |
+        .\scripts\Build-MsixPackage.ps1 -Configuration Release -Platform x64 -CertificatePath certs/ShareGuard_Dev.pfx -CertificatePassword "ShareGuardDev123!"
+
+    - name: Upload MSIX Package Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ShareGuard-MSIX-Release
+        path: artifacts/**/*.msix
+        if-no-files-found: error
+        retention-days: 7
+
+    - name: Cleanup Certificates and Secret Assets
+      if: always()
+      shell: pwsh
+      run: |
+        if (Test-Path "certs") {
+            Remove-Item -Path "certs" -Recurse -Force -ErrorAction SilentlyContinue
+            Write-Host "Temporary certificates directory deleted."
+        }
